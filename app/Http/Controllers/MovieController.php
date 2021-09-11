@@ -9,10 +9,29 @@ use App\movie_category;
 
 class MovieController extends Controller
 {
-    public function getMovie()
+    public function getMovie( Request $request)
     {
-        $movie =movie::with('movies_categories.categories')->OrderBy('id', 'DESC')->get();
+
+        if ($request->category =='' && $request->search =='' && $request->week =='') {
+            $movie =movie::with('movie_category','movie_category.categories')->OrderBy('id', 'DESC')->get();
+
+        }else if ($request->category !==''  && $request->search =='' && $request->week =='') {
+
+            $movie_category = movie_category::where('category_id',$request->category)->pluck('movie_id');
+            $movie_category->unique('movie_id');
+            $movie =movie::with('movie_category','movie_category.categories')->whereIn('id', $movie_category)->OrderBy('id', 'DESC')->get();
+
+        }else if( $request->category =='' && $request->week !=='' && $request->search ==''){
+
+            $movie =movie::with('movie_category','movie_category.categories')->whereDate('release_date','>=', $request->week)->OrderBy('id', 'DESC')->get();
+        }else if( $request->search !=='' && $request->category =='' && $request->week =='')  {
+
+            $movie =movie::with('movie_category','movie_category.categories')->where('title', 'LIKE', "%{$request->search}%")->OrderBy('id', 'DESC')->get();
+        }
+        
         return response()->json($movie);
+
+
     }
     public function store(Request $request)
     {
@@ -20,10 +39,11 @@ class MovieController extends Controller
         $movie->save();
 
         foreach ($request->category_id as $key => $value) {
-             movie_category::create([
-                'movie_id' => $movie->id,
-                'category_id' =>$value
-            ]);
+            $movie_category= new movie_category();
+            $movie_category->movie_id = $movie->id;
+            $movie_category->category_id =$value;
+            $movie_category->save();
+           
         }
     
     }

@@ -16,6 +16,6 @@ use Illuminate\Http\Request;
 Route::get('categories/get','MovieController@getCategory');
 
 Route::group([ 'middleware' => 'api','prefix' => 'movie'], function () {
-    Route::get('get', 'MovieController@getMovie');
+    Route::post('get', 'MovieController@getMovie');
     Route::post('create', 'MovieController@store');
 });

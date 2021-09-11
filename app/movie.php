@@ -9,12 +9,12 @@ class movie extends Model
     protected $table = 'movie';
     protected $guarded = ['id'];
 
-    public function movies_categories()
+    public function movie_category()
     {
-        return $this->belongsToMany('App\movie', 'movie_categories', 'movie_id','id')->withPivot('category_id');
+        return $this->belongsToMany('App\movie', 'movie_categories','movie_id','movie_id')->withPivot('category_id');
     }
     public function categories()
     {
-        return $this->belongsToMany('App\category', 'movie_categories','id' ,'category_id');
+        return $this->belongsToMany('App\category', 'movie_categories');
     }
 }

@@ -1,6 +1,6 @@
 <template> 
 <div class="container"> 
-  <Menu :category="category"  />
+ <Menu :category="category" @GetFilter ="Filter"></Menu>
   <div class="p-1 d-flex flex-column align-items-end"> <button class="btn btn-success" data-toggle="modal" data-target="#addNew" @click="openModalWindow">+</button>
   </div>
   <Create :category="category"  @GetMovies="getmovies"/>
@@ -22,8 +22,12 @@
           </div>
           </h5>
           <p class="card-text">
-              <span  class="badge badge-primary" v-for="category in movie.movies_categories" >
-              {{category.categories[0].name}}
+            <div>
+
+            </div>
+              <span  class="badge badge-primary" v-for="categories in movie.movie_category[0].categories" >
+                {{categories.name}}
+       
               </span>
               
           </p>
@@ -44,14 +48,18 @@ import moment from 'moment'
 
     export default {
     components: {
-          Menu,
+           Menu,
           Create
       },
        data (){
            return {
              movies:{},
-             category:[]
-
+             category:[],
+             filter:{
+              category:'',
+                search: '',
+                week:''
+             }
            }
        },
       mounted(){
@@ -66,8 +74,9 @@ import moment from 'moment'
              $('#addNew').modal('show');
            },
            GetMovies(){
-             axios.get('api/movie/get').then((response) => {
-                    this.movies =response.data
+            
+             axios.post('api/movie/get',this.filter).then((response) => {
+                     this.movies =response.data
                     }).catch((errors) => {
               })
            },
@@ -79,6 +88,28 @@ import moment from 'moment'
                     this.category =response.data
                     }).catch((errors) => {
                  })
+            },
+            Filter(data){
+              if (typeof data === 'number') {
+                 this.filter={
+                  category:data,
+                  search: '',
+                  week:''
+                 }
+              }else if(moment(data).isValid()){
+                this.filter={
+                  category:'',
+                  search: '',
+                  week:data
+                 }
+              }else{
+                this.filter={
+                  category:'',
+                  search: data,
+                  week:''
+                 }
+              }
+              this.GetMovies()
             }
       }
 
